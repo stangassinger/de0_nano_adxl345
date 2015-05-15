@@ -14,10 +14,10 @@ from copy import copy
 from myhdl import *
 
 def clk_gen(CLOCK_50, tick, tick2, I2C_SCLK):
-    CLK_FREQ = 48e6  # clock frequency
-    LED_RATE = 2.01 # strobe change rate 
-    #CLK_FREQ = 10   # simulation only !!!!
-    #LED_RATE = 1 # simulation mode
+    #CLK_FREQ = 48e6  # clock frequency
+    #LED_RATE = 2.01 # strobe change rate 
+    CLK_FREQ = 10   # simulation only !!!!
+    LED_RATE = 1 # simulation mode
     CNT_MAX = int(CLK_FREQ * LED_RATE)
     diff_rate = 0.45
     CNT_DIFF = int(CLK_FREQ * diff_rate)
