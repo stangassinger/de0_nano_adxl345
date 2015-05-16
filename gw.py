@@ -10,14 +10,13 @@ from copy import copy
 
 
 
-
 from myhdl import *
 
-def clk_gen(CLOCK_50, tick, tick2, I2C_SCLK):
-    #CLK_FREQ = 48e6  # clock frequency
-    #LED_RATE = 2.01 # strobe change rate 
-    CLK_FREQ = 10   # simulation only !!!!
-    LED_RATE = 1 # simulation mode
+def clk_gen(CLOCK_50, tick, tick2):
+    CLK_FREQ = 48e6  # clock frequency
+    LED_RATE = 1.01 # strobe change rate 
+    #CLK_FREQ = 10   # simulation only !!!!
+    #LED_RATE = 1 # simulation mode
     CNT_MAX = int(CLK_FREQ * LED_RATE)
     diff_rate = 0.45
     CNT_DIFF = int(CLK_FREQ * diff_rate)
@@ -28,11 +27,9 @@ def clk_gen(CLOCK_50, tick, tick2, I2C_SCLK):
         clk_cnt.next = clk_cnt + 1
         if clk_cnt == CNT_MAX-CNT_MAX/2:
             tick.next = 1
-            I2C_SCLK.next = 1
 
         if clk_cnt == CNT_MAX-CNT_MAX/2+CNT_DIFF:
             tick2.next = 1
-            I2C_SCLK.next = 0
             
             
         if clk_cnt == CNT_MAX:
@@ -116,11 +113,11 @@ def readData(tick, tick2, G_SENSOR_CS_N,I2C_SDAT,LED , I2C_SCLK, count, START, P
             G_SENSOR_CS_N.next = 1
 
 
-        if (count > 2) and (count < 11):
+        if (count > 1) and (count < 11):
             if (I2C_SDAT == True):
-                r_data2.next[10-count] = 1
+                r_data2.next[9-count] = 1
             else:
-                r_data2.next[10-count] = 0
+                r_data2.next[9-count] = 0
 
             
     
@@ -172,8 +169,8 @@ def readData(tick, tick2, G_SENSOR_CS_N,I2C_SDAT,LED , I2C_SCLK, count, START, P
 
     @always_comb
     def collector_comb():
-        #LED.next = r_data2
-        LED.next = collector 
+        LED.next = r_data2
+        #LED.next = collector 
             
                 
 
@@ -184,6 +181,13 @@ def readData(tick, tick2, G_SENSOR_CS_N,I2C_SDAT,LED , I2C_SCLK, count, START, P
 def drive_spi(tick, tick2,  G_SENSOR_CS_N,G_SENSOR_INT,I2C_SCLK,I2C_SDAT, LED, count, START, PAUSE):
 
     read_Adr_inst = readData( tick, tick2,  G_SENSOR_CS_N,I2C_SDAT,LED , I2C_SCLK,count, START, PAUSE)    
+    
+
+    @always_comb
+    def al_c1():
+        I2C_SCLK.next = tick
+        if G_SENSOR_CS_N == 1:
+            I2C_SCLK.next = 1
            
 
     return instances()      
@@ -196,7 +200,7 @@ def top( CLOCK_50, LED,G_SENSOR_CS_N,G_SENSOR_INT,I2C_SCLK,I2C_SDAT):
     START = 40
     PAUSE = 4
     count = Signal(intbv(START, min=-1, max=10000))
-    clk_gen_inst = clk_gen(CLOCK_50, tick, tick2, I2C_SCLK)
+    clk_gen_inst = clk_gen(CLOCK_50, tick, tick2)
     drive_spi_inst = drive_spi(tick, tick2, G_SENSOR_CS_N,G_SENSOR_INT,I2C_SCLK,I2C_SDAT, LED, count, START, PAUSE)
 
 
